@@ -27,6 +27,30 @@ export async function decodeAudioData(
   return buffer;
 }
 
+/**
+ * Creates a synthetic impulse response for a reverb effect.
+ * @param audioContext The AudioContext to use.
+ * @returns An AudioBuffer containing the impulse response.
+ */
+export function createReverbImpulseResponse(audioContext: AudioContext): AudioBuffer {
+    const sampleRate = audioContext.sampleRate;
+    const duration = 1.5; // seconds
+    const decay = 2.5;
+    const length = sampleRate * duration;
+    const impulse = audioContext.createBuffer(2, length, sampleRate); // Stereo for a wider sound
+    const left = impulse.getChannelData(0);
+    const right = impulse.getChannelData(1);
+
+    for (let i = 0; i < length; i++) {
+        // Create a decaying noise impulse
+        const envelope = Math.pow(1 - i / length, decay);
+        left[i] = (Math.random() * 2 - 1) * envelope;
+        right[i] = (Math.random() * 2 - 1) * envelope;
+    }
+    return impulse;
+}
+
+
 function writeString(view: DataView, offset: number, str: string) {
   for (let i = 0; i < str.length; i++) {
     view.setUint8(offset + i, str.charCodeAt(i));
